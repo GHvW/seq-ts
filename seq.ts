@@ -20,6 +20,14 @@ abstract class Seq<T> implements IterableIterator<T> {
   collect(): Array<T> {
     return [...this];
   }
+
+  count(): number {
+    let count = 0;
+    while (!this.next().done) {
+      count++
+    }
+    return count;
+  }
 }
 
 class Sequence<T> extends Seq<T> {
