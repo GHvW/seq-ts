@@ -1,0 +1,23 @@
+{
+  "name": "seq-ts",
+  "version": "0.0.1",
+  "description": "lazy sequences for js",
+  "main": "seq.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GHvW/seq-ts.git"
+  },
+  "author": "Garrett van Wageningen <ghvanw283@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/GHvW/seq-ts/issues"
+  },
+  "homepage": "https://github.com/GHvW/seq-ts#readme",
+  "devDependencies": {
+    "jest": "^24.1.0",
+    "typescript": "^3.3.1"
+  }
+}
