@@ -1,113 +1,378 @@
-abstract class Seq<T> implements IterableIterator<T> {
-  iter: IterableIterator<any>;
+function Seq() {};
 
-  constructor(iter: IterableIterator<any>) {
-    this.iter = iter;
+Seq.of = function<T>(args: IterableIterator<T>) {
+  return sequence(args);
+}
+
+function* sequence<T>(iterable: IterableIterator<T>) {
+  yield* iterable;
+}
+
+// sequence.prototype.map = function(fn) {
+//   return mapIter(fn, this);
+// }
+sequence.prototype.map = function<T, U>(fn: (x: T) => U) {
+  return mapIter(fn, this);
+}
+// sequence.prototype.map = function<T, U>(fn: (x: T) => U): IterableIterator<U> {
+//   return mapIter(fn, this);
+// }
+sequence.prototype.flatten = function() {
+  return flattenIter(this);
+}
+
+sequence.prototype.flatMap = function<T, U>(fn: (x: IterableIterator<T>) => IterableIterator<U>)  {
+  return flatMapIter(fn, this);
+}
+
+sequence.prototype.filter = function<T>(predicate: (x: T) => boolean) {
+  return filtrator(predicate, this);
+}
+
+//recursive faster?
+sequence.prototype.take = function<T>(n: number): IterableIterator<T> {
+  return takeIter(n, this);
+}
+
+sequence.prototype.takeWhile = function<T>(predicate: (x: T) => boolean) {
+  return takeWhileIter(predicate, this);
+}
+
+sequence.prototype.skip = function<T>(n: number): IterableIterator<T> {
+  return skipIter(n, this);
+}
+
+sequence.prototype.skipWhile = function<T>(predicate: (x: T) => boolean) {
+  return skipWhileIter(predicate, this);
+}
+
+sequence.prototype.zip = function<T>(seq: IterableIterator<T>) {
+  return ziperator(seq, this);
+}
+
+// generisize
+sequence.prototype.enumerate = function() {
+  return enumerateIter(this);
+}
+
+sequence.prototype.nth = function<T>(n: number): IterableIterator<T> {
+  return ntherator(n, this);
+}
+
+sequence.prototype.chain = function<T>(seq: IterableIterator<T>) {
+  return chainerator(seq, this);
+}
+
+// sequence.prototype.any = function<T>(predicate: (x: T) => boolean) {
+//   return anyIter(predicate, this);
+// }
+
+// sequence.prototype.peekable = function() {
+//   return peekableIter(this);
+// }
+
+//*******************Iterators************************* */
+function* mapIter<T, U>(fn: (x: T) => U, iterable: IterableIterator<T>) {
+  for (let val of iterable) {
+      yield fn(val);
   }
+}
+mapIter.prototype = Object.create(sequence.prototype);
 
-  abstract [Symbol.iterator](): IterableIterator<T>;
-
-  abstract next(): IteratorResult<T>;
-
-  map<U>(fn: (x: T) => U): Seq<U> {
-    return new MapSeq(fn, this);
-  }
-
-  filter(predicate: (x: T) => boolean): Seq<T> {
-    return new FilterSeq(predicate, this);
-  }
-
-  collect(): Array<T> {
-    return [...this];
-  }
-
-  count(): number {
-    let count = 0;
-    while (!this.next().done) {
-      count++
+function* flattenIter<T>(iterableOfIterables: IterableIterator<IterableIterator<T>>) {
+  for (let iter of iterableOfIterables) {
+    for (let val of iter) {
+      yield val;
     }
-    return count;
   }
 }
+flattenIter.prototype = Object.create(sequence.prototype);
 
-class Sequence<T> extends Seq<T> {
-  // iter: IterableIterator<T>;
-
-  constructor(iter: IterableIterator<T>) {
-    super(iter);
-  }
-
-  *[Symbol.iterator](): IterableIterator<T> {
-    yield* this.iter;
-  } 
-
-  next(): IteratorResult<T> {
-    return this.iter.next();
+function* flatMapIter<T, U>(fn: (x: IterableIterator<T>) => IterableIterator<U>, iterable: IterableIterator<IterableIterator<T>>) {
+  for (let val of iterable) {
+    for (let innerVal of fn(val)) {
+      yield innerVal;
+    }
   }
 }
+flatMapIter.prototype = Object.create(sequence.prototype);
 
-class FilterSeq<T> extends Seq<T> {
-  predicate: (x: T) => boolean;
-
-  constructor(predicate: (x: T) => boolean, iter: IterableIterator<T>) {
-    super(iter);
-    this.predicate = predicate;
-  }
-
-  *[Symbol.iterator](): IterableIterator<T> {
-    for (let val of this.iter) {
-      if (this.predicate(val)) {
-        yield val;
+function* filtrator<T>(predicate: (x: T) => boolean, iterable: IterableIterator<T>) {
+  for (let val of iterable) {
+      if (predicate(val)) {
+          yield val;
       }
-    }
   }
+}
+filtrator.prototype = Object.create(sequence.prototype);
 
-  next(): IteratorResult<T> {
-    let result = this.iter.next();
-    while (!result.done) {
-      if (this.predicate(result.value)) {
-        return { value: result.value, done: false };
-      }
-      result = this.iter.next();
+//test
+function* takeIter<T>(n: number, iterable: IterableIterator<T>) {
+  for (let i = 0; i < n; i++) { //check for done?
+    yield iterable.next().value;
+  }
+}
+takeIter.prototype = Object.create(sequence.prototype);
+
+function* takeWhileIter<T>(predicate: (x: T) => boolean, iterable: IterableIterator<T>) {
+  let next = iterable.next();
+  while (predicate(next.value)) {
+    yield next.value;
+    next = iterable.next();
+  }
+}
+takeWhileIter.prototype = Object.create(sequence.prototype);
+
+function* skipIter<T>(n: number, iterable: IterableIterator<T>) {
+  for (let i = 0; i < n; i++) {
+    iterable.next();
+  }
+  for (let val of iterable) {
+    yield val;
+  }
+}
+skipIter.prototype = Object.create(sequence.prototype);
+
+function* skipWhileIter<T>(predicate: (x: T) => boolean, iterable: IterableIterator<T>) {
+  let next = iterable.next().value;
+  while (predicate(next)) {
+    next = iterable.next().value;
+  };
+  yield next;
+
+  for (let val of iterable) {
+    yield val;
+  }
+}
+skipWhileIter.prototype = Object.create(sequence.prototype)
+
+//will require array style access x[0], x[1] to access values
+function* ziperator<T>(sequence: IterableIterator<T>, iterable: IterableIterator<T>) {
+  let first = iterable.next();
+  let second = sequence.next();
+  while (!first.done && !second.done) {
+    yield { 0: first.value, 1: second.value };
+    first = iterable.next();
+    second = sequence.next();
+  }
+}
+ziperator.prototype = Object.create(sequence.prototype);
+
+function* enumerateIter<T>(iterable: IterableIterator<T>) {
+  let count = 0;
+  for (let val of iterable) {
+    yield { i: count, value: val };
+    count += 1;
+  }
+}
+enumerateIter.prototype = Object.create(sequence.prototype);
+
+function* ntherator<T>(n: number, iterable: IterableIterator<T>) {
+  let count = 0;
+  for (let val of iterable) {
+    if (count === n) {
+      yield val;
     }
-    return { value: result.value, done: true };
+    count += 1;
+  }
+}
+ntherator.prototype = Object.create(sequence.prototype);
+
+function* chainerator<T>(seq: IterableIterator<T>, iterable: IterableIterator<T>) {
+  for (let val of iterable) {
+    yield val;
+  }
+  for (let val of seq) {
+    yield val;
+  }
+}
+chainerator.prototype = Object.create(sequence.prototype);
+
+// function* cycleIter(iterable) {
+
+// }
+// cycleIter.prototype = Object.create(sequence.prototype);
+
+//not chainable at the moment
+// function peekableIter(iterable) {
+//   let _next = undefined;
+//   let _nextCount = 0;
+//   let _peekCount = 0;
+//   return {
+//     next() {
+//       if (_nextCount < _peekCount) {
+//         _nextCount += 1;
+//         //assertEqual(_nextCount, _peekCount); shoudl be true at this point
+//       } else {
+//         _next = iterable.next();
+//         _nextCount += 1;
+//         _peekCount += 1;
+//       }
+//       return _next;
+//     },
+//     peek() {
+//       if (_nextCount === _peekCount) {
+//         _peekCount += 1;
+//         _next = iterable.next();
+//       }
+//       return _next;
+//     },
+//     *[Symbol.iterator]() {
+//       if (_nextCount !== _peekCount) {
+//         _nextCount += 1;
+//         //assertEqual(_nextCount, _peekCount); should be true at this point
+//         yield _next.value;
+//       }
+//       yield* iterable;
+//     } 
+//   }
+// }
+// peekableIter.prototype = Object.create(sequence.prototype);
+
+//cant make these lambdas because it doesn't bind this? "this" would be the window?
+//***********Terminal Operations****************************************** */
+sequence.prototype.collect = function<T>(): T[] {
+  return [...this];
+}
+
+sequence.prototype.count = function() {
+  let result = 0;
+  while (!this.next().done) {
+    result++
+  }
+  return result
+}
+
+sequence.prototype.forEach = function<T>(fn: (x: T) => void) {
+  for (let val of this) {
+    fn(val);
   }
 }
 
-class MapSeq<T, U> extends Seq<U> {
-  fn: (x: T) => U;
-
-  constructor(fn: (x: T) => U, iter: IterableIterator<T>) {
-    super(iter);
-    this.fn = fn;
+//sometimes called fold
+sequence.prototype.reduce = function<T, U>(fn: (acc: U, x: T) => U, start: U): U {
+  let next = this.next();
+  if (next.done) {
+    return start;
   }
+  return this.reduce(fn, fn(start, next.value));
+}
 
-  *[Symbol.iterator](): IterableIterator<U> {
-    for (let val of this.iter) {
-      yield this.fn(val);
+//look into this one later
+sequence.prototype.min = function<T>(): T {
+  let next = this.next()
+  let currMin = next.value;
+  while (!next.done) {
+    if (next.value < currMin) {
+      currMin = next.value;
     }
+    next = this.next();
   }
+  return currMin;
+}
 
-  next(): IteratorResult<U> {
-    let result = this.iter.next();
-    return !result.done
-      ? { value: this.fn(result.value), done: false}
-      : { value: this.fn(result.value), done: true }
+sequence.prototype.max = function<T>(): T {
+  let next = this.next();
+  let currMax = next.value;
+  while (!next.done) {
+    if (next.value > currMax) {
+      currMax = next.value;
+    }
+    next = this.next();
   }
+  return currMax;
 }
 
 
-// let x = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+// check this
+sequence.prototype.partition = function<T>(predicate: (x: T) => boolean) {
+  let part: { first: T[], second: T[] } = { first: [], second: [] };
+  for (let val of this) {
+    if (predicate(val)) {
+      part.first.push(val);
+    } else {
+      part.second.push(val);
+    }
+  }
+  return part;
+}
 
-// let y = new Sequence(x.values());
+sequence.prototype.any = function<T>(predicate: (x: T) => boolean) {
+  let next = this.next();
+  while (!next.done && !predicate(next.value)) {
+    next = this.next();
+  }
+  return predicate(next.value); //look into this one
+}
 
-// let z = y.map(x => x + 1);
+// this is wrong, check it
+// sequence.prototype.minByKey = function<T, U>(fn: (x: T) => U) {
+//   let currMin = this.next().value;
+//   for (let val of this) {
+//     if (fn(currMin) > fn(val)) {
+//       currMin = val;
+//     }
+//   }
+//   return currMin;
+// }
 
-// let w = z.filter(x => x % 2 === 0);
+// sequence.prototype.maxByKey = function(fn) {
+//   let currMax = this.next().value;
+//   for (let val of this) {
+//     if (fn(currMax) < fn(val)) {
+//       currMax = val;
+//     }
+//   }
+//   return currMax;
+// }
 
-// let v = w.collect();
+//rework to work with other types?
+sequence.prototype.sum = function() {
+  let acc = 0;
+  for (let val of this) {
+    acc += val;
+  }
+  return acc;
+}
 
-// console.log(y);
-// console.log(z);
-// console.log(w);
-// console.log(v);
+//rework to work with other types?
+sequence.prototype.product = function() {
+  let acc = 1;
+  for(let val of this) {
+    acc *= val;
+  }
+  return acc;
+}
+
+sequence.prototype.find = function<T>(predicate: (x: T) => boolean): T {
+  let next = this.next();
+  if (!next.done && !predicate(next.value)) {
+    next = this.next();
+  }
+  return next.value;
+}
+
+// Iterable<T> -> (T => boolean) -> boolean
+sequence.prototype.all = function<T>(predicate: (x: T) => boolean): boolean {
+  let next = this.next();
+  while (!next.done) {
+    if (!predicate(next.value)) {
+      return false
+    }
+    next = this.next();
+  }
+  return true;
+}
+
+sequence.prototype.position = function<T>(predicate: (x: T) => boolean): number | null {
+  let count = 0;
+  for (let val of this) {
+    if (predicate(val)) {
+      return count;
+    }
+    count += 1;
+  }
+  return null;
+}
+
+module.exports = Seq;
