@@ -4,17 +4,15 @@
 //   return sequence(args);
 // }
 // type sequence<T> = IterableIterator<T>;
+// export interface sequence<T> {
+//   (): IterableIterator<T>
+// }
 
 export default function* sequence<T>(iterable: Iterable<T>) {
   yield* iterable;
 }
-function sequence<T>(iterable: Iterable<T>) {
-  
-}
 
-// sequence.prototype.map = function(fn) {
-//   return mapIter(fn, this);
-// }
+
 sequence.prototype.map = function<T, U>(fn: (x: T) => U) {
   return mapIter(fn, this);
 }
@@ -74,6 +72,7 @@ sequence.prototype.chain = function<T>(seq: IterableIterator<T>) {
 // sequence.prototype.peekable = function() {
 //   return peekableIter(this);
 // }
+
 
 //*******************Iterators************************* */
 function* mapIter<T, U>(fn: (x: T) => U, iterable: Iterable<T>) {
