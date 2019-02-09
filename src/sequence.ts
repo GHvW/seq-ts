@@ -1,27 +1,29 @@
-function Seq() {};
+// function Seq() {};
 
-Seq.of = function<T>(args: IterableIterator<T>) {
-  return sequence(args);
-}
+// Seq.of = function<T>(args: Iterable<T>) {
+//   return sequence(args);
+// }
+// type sequence<T> = IterableIterator<T>;
+// export interface sequence<T> {
+//   (): IterableIterator<T>
+// }
 
-function* sequence<T>(iterable: IterableIterator<T>) {
+export default function* sequence<T>(iterable: Iterable<T>) {
   yield* iterable;
 }
 
-// sequence.prototype.map = function(fn) {
-//   return mapIter(fn, this);
-// }
+
 sequence.prototype.map = function<T, U>(fn: (x: T) => U) {
   return mapIter(fn, this);
 }
 // sequence.prototype.map = function<T, U>(fn: (x: T) => U): IterableIterator<U> {
 //   return mapIter(fn, this);
 // }
-sequence.prototype.flatten = function() {
+sequence.prototype.flatten = function<T>(): IterableIterator<T> {
   return flattenIter(this);
 }
 
-sequence.prototype.flatMap = function<T, U>(fn: (x: IterableIterator<T>) => IterableIterator<U>)  {
+sequence.prototype.flatMap = function<T, U>(fn: (x: Iterable<T>) => IterableIterator<U>)  {
   return flatMapIter(fn, this);
 }
 
@@ -71,15 +73,16 @@ sequence.prototype.chain = function<T>(seq: IterableIterator<T>) {
 //   return peekableIter(this);
 // }
 
+
 //*******************Iterators************************* */
-function* mapIter<T, U>(fn: (x: T) => U, iterable: IterableIterator<T>) {
+function* mapIter<T, U>(fn: (x: T) => U, iterable: Iterable<T>) {
   for (let val of iterable) {
       yield fn(val);
   }
 }
 mapIter.prototype = Object.create(sequence.prototype);
 
-function* flattenIter<T>(iterableOfIterables: IterableIterator<IterableIterator<T>>) {
+function* flattenIter<T>(iterableOfIterables: Iterable<Iterable<T>>) {
   for (let iter of iterableOfIterables) {
     for (let val of iter) {
       yield val;
@@ -88,7 +91,7 @@ function* flattenIter<T>(iterableOfIterables: IterableIterator<IterableIterator<
 }
 flattenIter.prototype = Object.create(sequence.prototype);
 
-function* flatMapIter<T, U>(fn: (x: IterableIterator<T>) => IterableIterator<U>, iterable: IterableIterator<IterableIterator<T>>) {
+function* flatMapIter<T, U>(fn: (x: Iterable<T>) => IterableIterator<U>, iterable: Iterable<Iterable<T>>) {
   for (let val of iterable) {
     for (let innerVal of fn(val)) {
       yield innerVal;
@@ -97,7 +100,7 @@ function* flatMapIter<T, U>(fn: (x: IterableIterator<T>) => IterableIterator<U>,
 }
 flatMapIter.prototype = Object.create(sequence.prototype);
 
-function* filtrator<T>(predicate: (x: T) => boolean, iterable: IterableIterator<T>) {
+function* filtrator<T>(predicate: (x: T) => boolean, iterable: Iterable<T>) {
   for (let val of iterable) {
       if (predicate(val)) {
           yield val;
@@ -158,7 +161,7 @@ function* ziperator<T>(sequence: IterableIterator<T>, iterable: IterableIterator
 }
 ziperator.prototype = Object.create(sequence.prototype);
 
-function* enumerateIter<T>(iterable: IterableIterator<T>) {
+function* enumerateIter<T>(iterable: Iterable<T>) {
   let count = 0;
   for (let val of iterable) {
     yield { i: count, value: val };
@@ -167,7 +170,7 @@ function* enumerateIter<T>(iterable: IterableIterator<T>) {
 }
 enumerateIter.prototype = Object.create(sequence.prototype);
 
-function* ntherator<T>(n: number, iterable: IterableIterator<T>) {
+function* ntherator<T>(n: number, iterable: Iterable<T>) {
   let count = 0;
   for (let val of iterable) {
     if (count === n) {
@@ -374,5 +377,3 @@ sequence.prototype.position = function<T>(predicate: (x: T) => boolean): number 
   }
   return null;
 }
-
-module.exports = Seq;
