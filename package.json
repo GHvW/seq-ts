@@ -4,7 +4,10 @@
   "description": "lazy sequences for js",
   "main": "lazer.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run build-ts",
+    "build-ts": "tsc",
+    "builtest": "npm run build && npm test",
+    "test": "jest dist/test/lazer.test.js"
   },
   "repository": {
     "type": "git",
@@ -17,7 +20,7 @@
   },
   "homepage": "https://github.com/GHvW/lazer#readme",
   "devDependencies": {
-    "@types/jest": "^24.0.0",
+    "@types/jest": "^24.0.11",
     "jest": "^24.1.0",
     "typescript": "^3.3.1"
   },
