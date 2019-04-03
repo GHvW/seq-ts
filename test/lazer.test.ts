@@ -1,8 +1,8 @@
-import { Seq, map, filter, flatMap } from "../src/lazer";
+import { Seq, map, filter, flatMap, flatten, forEach } from "../src/lazer";
 
 
 let arr = [1, 2, 3];
-// let bigArr = [1, 2, 3, 4, 5, 6];
+let bigArr = [1, 2, 3, 4, 5, 6];
 
 test("Seq iter(): allows you to exhaust the underlying IterableIterator", () => {
   let seq = Seq.from(arr).iter();
@@ -22,15 +22,6 @@ test("map: applies a mapping function to each element of the iterable", () => {
   expect(seq.next().value).toBe(undefined);
 });
 
-// test("test flatten: flattens a 2d array to a 1d array of the same elements", () => {
-//   let twoD = [[1], [2], [3]];
-//   let seq = sequence(twoD).flatten();
-
-//   expect(seq.next().value).toBe(1);
-//   expect(seq.next().value).toBe(2);
-//   expect(seq.next().value).toBe(3);
-//   expect(seq.next().value).toBe(undefined);
-// });
 
 test("filter: filters out values that do not satisfy the predicate", () => {
   let seq = filter((x: number) => x % 2 === 0)(arr);
@@ -52,6 +43,17 @@ test("flatMap: applies a mapping function to each element of the iterable and th
     last = val;
   }
   expect(last).toBe("d");
+  expect(seq.next().value).toBe(undefined);
+});
+
+
+test("flatten: flattens a 2d iterable to a 1d iterable of the same elements", () => {
+  let twoD = [[1], [2], [3]];
+  let seq = flatten()(twoD);
+
+  expect(seq.next().value).toBe(1);
+  expect(seq.next().value).toBe(2);
+  expect(seq.next().value).toBe(3);
   expect(seq.next().value).toBe(undefined);
 });
 
@@ -77,17 +79,13 @@ test("flatMap: applies a mapping function to each element of the iterable and th
 //     expect(seq.next().value).toBe(undefined);
 // });
 
-// test("test forEach: for each value in the sequence add to a total, consuming the sequence", () => {
-//   let seq = sequence(bigArr);
-//   let total = 10;
+test("forEach: forEach consumes the iterator, mimicing a for-loop's behavior", () => {
+  let total = 10;
 
-//   seq.forEach(x => {
-//     total += x;
-//   });
+  forEach((x: number) => total += x)(bigArr);
 
-//   expect(total).toBe(31);
-//   expect(seq.next().value).toBe(undefined);
-// });
+  expect(total).toBe(31);
+});
 
 // test("test count: get the number of values in a sequence, consuming the sequence", () => {
 //   let seq = sequence(bigArr);

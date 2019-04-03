@@ -54,6 +54,24 @@ export const flatMap = <T, U>(fn: (x: T) => Iterable<U>) => {
   };
 }
 
+export const flatten = <T>() => {
+  return function*(iter: Iterable<Iterable<T>>) {
+    for (let innerIterable of iter) {
+      for (let val of innerIterable) {
+        yield val;
+      }
+    }
+  };
+}
+
+export const forEach = <T>(fn: (x: T) => void) => {
+  return function(iter: Iterable<T>) {
+    for (let val of iter) {
+      fn(val);
+    }
+  }
+}
+
 export const map = <T, U>(fn: (x: T) => U) => {
   return function*(iter: Iterable<T>) {
       for (let val of iter) {
@@ -71,105 +89,8 @@ export const collect = <T, U>(iter: IterableIterator<T>, collector: (x: Iterable
 export const toArray = <T>(iter: IterableIterator<T>) => [...iter];
 
 //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX TEST XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx
-// let something = 
-//   Seq.from([1, 2, 3, 4, 5]).chain(
-//           map(x => x + 1),
-//           filter(x => x % 2 === 0));
-
-// let result = collect(something, toArray);
-// // function Seq() {};
-
-// // Seq.of = function<T>(args: Iterable<T>) {
-// //   return sequence(args);
-// // }
-// // type sequence<T> = IterableIterator<T>;
-// // export interface sequence<T> {
-// //   (): IterableIterator<T>
-// // }
-// // type Seq<T> = IterableIterator<T>;
-
-// // function pipe<T, U>(data: Seq<T>, ...fns: Array<(seq: Seq<T>) => Seq<U>>): Seq<T> {
-// //   if (fns.length === 0) {
-// //     return data;
-// //   }
-
-// //   let result = fns.reduce((acc, nextFn) => nextFn(acc), data);
-
-// //   let fn = fns.shift();
-// //   return pipe(fn(data), ...fns); 
-// // }
-// // interface Pipe<T> {
-// //   <U>(fn: (x: T) => U): U;
-// // }
-
-// // class Seq<T> implements Pipe<T> {
-// //   iter: IterableIterator<T>;
-
-// //   constructor(iter: Iterable<T>) {
-// //     this.iter = iter;
-// //   }
-
-// //   private *to_seq(iter: Iterable<T>): IterableIterator<T> {
-// //     yield* iter;
-// //   }
-
-// //   l(): 
-// // }
-// let arr: Generator = [1, 2, 3, 4].values();
-
-// abstract class Seq<T> implements Generator {
-//   iter: IterableIterator<T>
-
-//   constructor(iter: Iterable<T>) {
-//     this.iter = this.sequence(iter);
-//   }
-
-//   next(): IteratorResult<T> {
-//     return this.iter.next();
-//   }
-
-//   private *sequence(iterable: Iterable<T>): IterableIterator<T> {
-//     yield* iterable;
-//   }
-// }
-
-// class Sequence<T> extends Seq<T> {
-
-//   *map<U>(fn: (x: T) => U): Seq<U> {
-//     for (let val of this.iter) {
-//       yield fn(val);
-//     }
-//   }
-// }
-
-// class Iter<T> {
-//   iter: Iterable<T>;
-
-//   constructor(iter: Iterable<T>) {
-//     this.iter = iter;
-//   }
-
-//   *asSeq(): Generator {
-//     yield* this.iter;
-//   }
-// }
-
-// sequence.prototype.map = function<T, U>(fn: (x: T) => U) {
-//   return mapIter(fn, this);
-// }
-// // sequence.prototype.map = function<T, U>(fn: (x: T) => U): IterableIterator<U> {
-// //   return mapIter(fn, this);
-// // }
 // sequence.prototype.flatten = function<T>(): IterableIterator<T> {
 //   return flattenIter(this);
-// }
-
-// sequence.prototype.flatMap = function<T, U>(fn: (x: Iterable<T>) => IterableIterator<U>)  {
-//   return flatMapIter(fn, this);
-// }
-
-// sequence.prototype.filter = function<T>(predicate: (x: T) => boolean) {
-//   return filtrator(predicate, this);
 // }
 
 // //recursive faster?
@@ -216,13 +137,6 @@ export const toArray = <T>(iter: IterableIterator<T>) => [...iter];
 
 
 // //*******************Iterators************************* */
-// function* mapIter<T, U>(fn: (x: T) => U, iterable: Iterable<T>) {
-//   for (let val of iterable) {
-//       yield fn(val);
-//   }
-// }
-// mapIter.prototype = Object.create(sequence.prototype);
-
 // function* flattenIter<T>(iterableOfIterables: Iterable<Iterable<T>>) {
 //   for (let iter of iterableOfIterables) {
 //     for (let val of iter) {
@@ -231,15 +145,6 @@ export const toArray = <T>(iter: IterableIterator<T>) => [...iter];
 //   }
 // }
 // flattenIter.prototype = Object.create(sequence.prototype);
-
-// function* flatMapIter<T, U>(fn: (x: Iterable<T>) => IterableIterator<U>, iterable: Iterable<Iterable<T>>) {
-//   for (let val of iterable) {
-//     for (let innerVal of fn(val)) {
-//       yield innerVal;
-//     }
-//   }
-// }
-// flatMapIter.prototype = Object.create(sequence.prototype);
 
 // function* filtrator<T>(predicate: (x: T) => boolean, iterable: Iterable<T>) {
 //   for (let val of iterable) {
