@@ -1,21 +1,21 @@
 {
-  "name": "seq-ts",
+  "name": "lazer",
   "version": "0.0.1",
   "description": "lazy sequences for js",
-  "main": "seq.js",
+  "main": "lazer.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GHvW/seq-ts.git"
+    "url": "git+https://github.com/GHvW/lazer.git"
   },
   "author": "Garrett van Wageningen <ghvanw283@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/GHvW/seq-ts/issues"
+    "url": "https://github.com/GHvW/lazer/issues"
   },
-  "homepage": "https://github.com/GHvW/seq-ts#readme",
+  "homepage": "https://github.com/GHvW/lazer#readme",
   "devDependencies": {
     "@types/jest": "^24.0.0",
     "jest": "^24.1.0",
