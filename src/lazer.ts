@@ -1,23 +1,28 @@
-class Sequence<T> {
-  iter: IterableIterator<T>;
+export class Sequence<T> {
+  seq: IterableIterator<T>;
 
-  constructor(iter: IterableIterator<T>) {
-      this.iter = iter;
+  constructor(seq: IterableIterator<T>) {
+      this.seq = seq;
   }
 
   *chain(...generators: Array<(x: IterableIterator<any>) => IterableIterator<any>>): IterableIterator<any> {
-      let result = this.iter;
+      let result = this.seq;
       for (let gen of generators) {
           result = gen(result);
       }
 
       yield* result;
   }
+
+  // This probably shouldn't be needed
+  *iter() {
+    yield* this.seq;
+  }
 }
 
 
 
-class Seq {
+export class Seq {
 
   static from<T>(iter: Iterable<T>) {
       const sequence = function*<T>(iter: Iterable<T>) {
@@ -29,7 +34,7 @@ class Seq {
 }
 
 
-const filter = <T>(predicate: (x: T) => boolean) => {
+export const filter = <T>(predicate: (x: T) => boolean) => {
   return function*(iter: Iterable<T>) {
       for (let val of iter) {
           if (predicate(val)) {
@@ -39,7 +44,7 @@ const filter = <T>(predicate: (x: T) => boolean) => {
   };
 }
 
-const flatMap = <T, U>(fn: (x: T) => Iterable<U>) => {
+export const flatMap = <T, U>(fn: (x: T) => Iterable<U>) => {
   return function*(iter: Iterable<T>) {
     for (let val of iter) {
       for (let innerVal of fn(val)) {
@@ -49,7 +54,7 @@ const flatMap = <T, U>(fn: (x: T) => Iterable<U>) => {
   };
 }
 
-const map = <T, U>(fn: (x: T) => U) => {
+export const map = <T, U>(fn: (x: T) => U) => {
   return function*(iter: Iterable<T>) {
       for (let val of iter) {
           yield fn(val);
@@ -59,17 +64,17 @@ const map = <T, U>(fn: (x: T) => U) => {
 
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Collectors XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-const collect = <T, U>(iter: IterableIterator<T>, collector: (x: IterableIterator<T>) => U) => {
+export const collect = <T, U>(iter: IterableIterator<T>, collector: (x: IterableIterator<T>) => U) => {
   return collector(iter);
 }
 
-const toArray = <T>(iter: IterableIterator<T>) => [...iter];
+export const toArray = <T>(iter: IterableIterator<T>) => [...iter];
 
 //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX TEST XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx
-let something = 
-  Seq.from([1, 2, 3, 4, 5]).chain(
-          map(x => x + 1),
-          filter(x => x % 2 === 0));
+// let something = 
+//   Seq.from([1, 2, 3, 4, 5]).chain(
+//           map(x => x + 1),
+//           filter(x => x % 2 === 0));
 
 // let result = collect(something, toArray);
 // // function Seq() {};

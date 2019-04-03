@@ -1,26 +1,26 @@
-// import * as Seq from "../src/lazer";
+import { Seq, map, filter, flatMap } from "../src/lazer";
 
 
-// let arr = [1, 2, 3];
+let arr = [1, 2, 3];
 // let bigArr = [1, 2, 3, 4, 5, 6];
 
-// test("test sequence: converts Array to sequenceuence", () => {
-//   let seq = sequence(arr);
+test("Seq iter(): allows you to exhaust the underlying IterableIterator", () => {
+  let seq = Seq.from(arr).iter();
 
-//   expect(seq.next().value).toBe(1);
-//   expect(seq.next().value).toBe(2);
-//   expect(seq.next().value).toBe(3);
-//   expect(seq.next().value).toBe(undefined);
-// });
+  expect(seq.next().value).toBe(1);
+  expect(seq.next().value).toBe(2);
+  expect(seq.next().value).toBe(3);
+  expect(seq.next().value).toBe(undefined);
+});
 
-// test("test map: maps each element of a sequence to it's square", () => {
-//   let seq = sequence(arr).map(x => x * x);
+test("map: applies a mapping function to each element of the iterable", () => {
+  let seq = map((x: number) => x * x)(arr);
 
-//   expect(seq.next().value).toBe(1);
-//   expect(seq.next().value).toBe(4);
-//   expect(seq.next().value).toBe(9);
-//   expect(seq.next().value).toBe(undefined);
-// });
+  expect(seq.next().value).toBe(1);
+  expect(seq.next().value).toBe(4);
+  expect(seq.next().value).toBe(9);
+  expect(seq.next().value).toBe(undefined);
+});
 
 // test("test flatten: flattens a 2d array to a 1d array of the same elements", () => {
 //   let twoD = [[1], [2], [3]];
@@ -32,28 +32,28 @@
 //   expect(seq.next().value).toBe(undefined);
 // });
 
-// test("test filter: filter odds out of the sequence", () => {
-//   let seq = sequence(arr).filter(x => x % 2 === 0);
+test("filter: filters out values that do not satisfy the predicate", () => {
+  let seq = filter((x: number) => x % 2 === 0)(arr);
 
-//   expect(seq.next().value).toBe(2);
-//   expect(seq.next().value).toBe(undefined);
-// });
+  expect(seq.next().value).toBe(2);
+  expect(seq.next().value).toBe(undefined);
+});
 
-// test("test flatMap: map a 2d array of X's to a 2d array of X, Y and flatten it", () => {
-//   let twoD = [["X"], ["X"], ["X"]];
-//   let seq = sequence(twoD).flatMap(x => x.concat("Y"));
+test("flatMap: applies a mapping function to each element of the iterable and then flattens it", () => {
+  let words = ["hi", "bye", "good"];
+  let seq = flatMap((x: string) => x.split(""))(words);
 
-//   expect(seq.next().value).toBe("X");
-//   expect(seq.next().value).toBe("Y");
-//   expect(seq.next().value).toBe("X");
+  expect(seq.next().value).toBe("h");
+  expect(seq.next().value).toBe("i");
+  expect(seq.next().value).toBe("b");
 
-//   let counter = 0;
-//   for (let _ of seq) {
-//     counter++
-//   }
-//   expect(counter).toBe(3);
-//   expect(seq.next().value).toBe(undefined);
-// });
+  let last = null;
+  for (let val of seq) {
+    last = val;
+  }
+  expect(last).toBe("d");
+  expect(seq.next().value).toBe(undefined);
+});
 
 // test("test collect (to Array): in 1, 2, 3, 4, 5, 6, filter evens, map to it's double, collect to array", () => {
 //   let newArr = sequence(bigArr).filter(x => x % 2 === 0).map(x => x * 2).collect();
