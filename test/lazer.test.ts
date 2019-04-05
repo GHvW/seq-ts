@@ -1,4 +1,5 @@
-import { Seq, map, filter, flatMap, flatten, forEach } from "../src/lazer";
+import { Seq, any, chain, enumerate, filter, flatMap, flatten, forEach, map, nth, skip, skipWhile, take, takeWhile, zip,
+         all, count, max, min, partition, position, product, reduce, sum } from "../src/lazer";
 
 
 let arr = [1, 2, 3];
@@ -13,18 +14,37 @@ test("Seq iter(): allows you to exhaust the underlying IterableIterator", () => 
   expect(seq.next().value).toBe(undefined);
 });
 
-test("map: applies a mapping function to each element of the iterable", () => {
-  let seq = map((x: number) => x * x)(arr);
 
-  expect(seq.next().value).toBe(1);
+test("any: returns true if any values match the predicate, false if not. Short circuits on match leaving the rest unconsumed", () => {
+  let seq = bigArr.values();
+
+  expect(any((x: number) => x % 2 === 0)(seq)).toBe(true);
+  expect(seq.next().value).toBe(3);
+});
+
+test("test chain: chains two iterators together to yield values from the first then the second", () => {
+  let arr1 = [0, 2];
+  let arr2 = [4, 9];
+  let seq = chain(arr1.values())(arr2.values());
+
+  expect(seq.next().value).toBe(0);
+  expect(seq.next().value).toBe(2);
   expect(seq.next().value).toBe(4);
   expect(seq.next().value).toBe(9);
   expect(seq.next().value).toBe(undefined);
 });
 
+test("enumerate: creates an iterator that includes the current iteration count as well as the next value", () => {
+  let seq = enumerate(arr.values());
+
+  expect(seq.next().value).toEqual({ count: 0, value: 1 });
+  expect(seq.next().value).toEqual({ count: 1, value: 2 });
+  expect(seq.next().value).toEqual({ count: 2, value: 3 });
+  expect(seq.next().value).toBe(undefined);
+});
 
 test("filter: filters out values that do not satisfy the predicate", () => {
-  let seq = filter((x: number) => x % 2 === 0)(arr);
+  let seq = filter((x: number) => x % 2 === 0)(arr.values());
 
   expect(seq.next().value).toBe(2);
   expect(seq.next().value).toBe(undefined);
@@ -32,7 +52,7 @@ test("filter: filters out values that do not satisfy the predicate", () => {
 
 test("flatMap: applies a mapping function to each element of the iterable and then flattens it", () => {
   let words = ["hi", "bye", "good"];
-  let seq = flatMap((x: string) => x.split(""))(words);
+  let seq = flatMap((x: string) => x.split(""))(words.values());
 
   expect(seq.next().value).toBe("h");
   expect(seq.next().value).toBe("i");
@@ -49,7 +69,7 @@ test("flatMap: applies a mapping function to each element of the iterable and th
 
 test("flatten: flattens a 2d iterable to a 1d iterable of the same elements", () => {
   let twoD = [[1], [2], [3]];
-  let seq = flatten()(twoD);
+  let seq = flatten(twoD.values());
 
   expect(seq.next().value).toBe(1);
   expect(seq.next().value).toBe(2);
@@ -57,148 +77,147 @@ test("flatten: flattens a 2d iterable to a 1d iterable of the same elements", ()
   expect(seq.next().value).toBe(undefined);
 });
 
-// test("test collect (to Array): in 1, 2, 3, 4, 5, 6, filter evens, map to it's double, collect to array", () => {
-//   let newArr = sequence(bigArr).filter(x => x % 2 === 0).map(x => x * 2).collect();
-
-//   expect(newArr).toEqual([4, 8, 12]);
-// });
-
-// test("test take: in 1, 2, 3, 4, 5, 6, take the first 3 numbers", () => {
-//   let seq = sequence(bigArr).take(3);
-
-//   expect(seq.next().value).toBe(1);
-//   expect(seq.next().value).toBe(2);
-//   expect(seq.next().value).toBe(3);
-//   expect(seq.next().value).toBe(undefined);
-// });
-
-// test("test takeWhile: take until applied predicate is false", () => {
-//     let seq = sequence(bigArr).takeWhile(x => x < 2);
-
-//     expect(seq.next().value).toBe(1);
-//     expect(seq.next().value).toBe(undefined);
-// });
 
 test("forEach: forEach consumes the iterator, mimicing a for-loop's behavior", () => {
   let total = 10;
 
-  forEach((x: number) => total += x)(bigArr);
+  forEach((x: number) => total += x)(bigArr.values());
 
   expect(total).toBe(31);
 });
 
-// test("test count: get the number of values in a sequence, consuming the sequence", () => {
-//   let seq = sequence(bigArr);
-//   let count = seq.count();
 
-//   expect(count).toBe(6);
-//   expect(seq.next().value).toBe(undefined);
-// });
+test("map: applies a mapping function to each element of the iterable", () => {
+  let seq = map((x: number) => x * x)(arr.values());
 
-// test("test reduce: apply the function to each element, producing an accumulated value", () => {
-//   let sum = sequence(bigArr).reduce((acc, x) => acc + x, 0);
+  expect(seq.next().value).toBe(1);
+  expect(seq.next().value).toBe(4);
+  expect(seq.next().value).toBe(9);
+  expect(seq.next().value).toBe(undefined);
+});
 
-//   expect(sum).toBe(21);
-// });
+test("nth: return the nth element from the sequence", () => {
+  let seq = nth(1)(arr.values());
 
-// test("test skip: skip n elements of the sequence, consuming them", () => {
-//   let seq = sequence(bigArr).skip(4);
+  expect(seq.next().value).toBe(2);
+  expect(seq.next().value).toBe(undefined);
+});
 
-//   expect(seq.next().value).toBe(5);
-//   expect(seq.next().value).toBe(6);
-//   expect(seq.next().value).toBe(undefined);
-// });
+test("skip: skip n elements of the sequence, consuming them", () => {
+  let seq = skip(4)(bigArr.values());
 
-// test("test skipWhile: skip until predicate satisfied, consuming skipped values", () => {
-//   let seq = sequence(bigArr).skipWhile(x => x < 5);
+  expect(seq.next().value).toBe(5);
+  expect(seq.next().value).toBe(6);
+  expect(seq.next().value).toBe(undefined);
+});
 
-//   expect(seq.next().value).toBe(5);
-//   expect(seq.next().value).toBe(6);
-//   expect(seq.next().value).toBe(undefined);
-// });
 
-// test("test zip: takes an iterator returns a new iterator that iterates over both at the same time", () => {
-//   let one = [1, 2, 3];
-//   let two = [4, 5, 6];
-//   let seq = sequence(one).zip(sequence(two));
+test("skipWhile: skip until predicate satisfied, consuming skipped values", () => {
+  let seq = skipWhile(x => x < 5)(bigArr.values());
 
-//   expect(seq.next().value).toEqual({ 0: 1, 1: 4});
-//   expect(seq.next().value).toEqual({ 0: 2, 1: 5 });
-//   expect(seq.next().value).toEqual({ 0: 3, 1: 6 });
-//   expect(seq.next().value).toBe(undefined);
-// });
+  expect(seq.next().value).toBe(5);
+  expect(seq.next().value).toBe(6);
+  expect(seq.next().value).toBe(undefined);
+});
 
-// test("test enumerate: will create an iterator that includes the current iteration count as well as the next value", () => {
-//   let seq = sequence(arr).enumerate();
 
-//   expect(seq.next().value).toEqual({ i: 0, value: 1 });
-//   expect(seq.next().value).toEqual({ i: 1, value: 2 });
-//   expect(seq.next().value).toEqual({ i: 2, value: 3 });
-//   expect(seq.next().value).toBe(undefined);
-// });
+test("take: yields the first n elements of the iterator", () => {
+  let seq = take(3)(bigArr.values());
 
-// test("test nth: return the nth element from the sequence", () => {
-//   let seq = sequence(arr).nth(1);
+  expect(seq.next().value).toBe(1);
+  expect(seq.next().value).toBe(2);
+  expect(seq.next().value).toBe(3);
+  expect(seq.next().value).toBe(undefined);
+});
 
-//   expect(seq.next().value).toBe(2);
-//   expect(seq.next().value).toBe(undefined);
-// });
+test("takeWhile: take until predicate is false", () => {
+    let seq = takeWhile(x => x < 2)(arr.values());
 
-// // test("test peekable: allows access to the next value in the sequence without consuming it", () => {
-// //   let seq = sequence(arr).peekable();
+    expect(seq.next().value).toBe(1);
+    expect(seq.next().value).toBe(undefined);
+});
 
-// //   expect(seq.peek().value).toBe(1);
-// //   expect(seq.next().value).toBe(1);
-// //   expect(seq.peek().value).toBe(2);
-// //   expect(seq.peek().value).toBe(2);
-// //   expect(seq.next().value).toBe(2);
-// //   expect(seq.next().value).toBe(3);
-// //   expect(seq.next().value).toBe(undefined);
 
-// //   let secondsequence = sequence(bigArr).peekable();
+test("zip: takes two iterators and returns a new iterator that iterates over both at the same time", () => {
+  let one = [1, 2, 3];
+  let two = [4, 5, 6];
+  let seq = zip(one.values())(two.values());
 
-// //   expect(secondsequence.next().value).toBe(1);
-// //   expect(secondsequence.peek().value).toBe(2);
+  expect(seq.next().value).toEqual({ 0: 1, 1: 4});
+  expect(seq.next().value).toEqual({ 0: 2, 1: 5 });
+  expect(seq.next().value).toEqual({ 0: 3, 1: 6 });
+  expect(seq.next().value).toBe(undefined);
+});
 
-// //   let next = 2;
-// //   for (let val of secondsequence) {
-// //     expect(val).toBe(next);
-// //     next += 1;
-// //   }
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx Collector tests XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-// //   let testPeek = sequence(arr).peekable().max();
-// //   expect(testPeek).toBe(3);
-// // });
+test("all: tests if all values of the sequence match the given predicate. Short circuits on false value", () => {
+  let seq1 = arr.values();
+  let result1 = all(x => x < 10)(seq1);
 
-// test("test partition: consumes the sequence creating two lists. one with values that satisfy the predicate and one with values that do not", () => {
-//   let part = sequence(bigArr).partition(x => x % 2 === 0);
+  expect(result1).toBe(true);
+  expect(seq1.next().value).toBe(undefined);
 
-//   expect(part[0]).toEqual([2, 4, 6]);
-//   expect(part[1]).toEqual([1, 3, 5]);
-// });
+  let seq2 = arr.values();
+  let result2 = all(x => x < 2)(seq2);
 
-// test("test any: tests whether any values match the predicate, returns true if so, false if not. Short circuits on match leaving the rest unconsumed", () => {
-//   let seq = sequence(bigArr);
+  expect(result2).toBe(false);
+  expect(seq2.next().value).toBe(3);
+});
 
-//   expect(seq.any(x => x % 2 === 0)).toBe(true);
-//   expect(seq.next().value).toBe(3);
-// });
+test("count: counts the number of values in the sequence, consuming it in the process", () => {
+  let seq = bigArr.values();
+  let result = count(seq);
 
-// test("test min: returns the min value of the sequence, consuming the sequence", () => {
-//   let min = sequence(arr).min();
+  expect(result).toBe(6);
+  expect(seq.next().value).toBe(undefined);
+});
 
-//   expect(min).toBe(1);
-// });
+test("max: returns the maximum value of the sequence, consuming the sequence", () => {
+  let result = max(arr.values());
 
-// test("test max: returns the max value of the sequence, consuming the sequence", () => {
-//   let max = sequence(arr).max();
+  expect(result).toBe(3);
+});
 
-//   expect(max).toBe(3);
-// });
+test("min: returns the minimum value of the sequence, consuming the sequence", () => {
+  let result = min(arr.values());
 
-// // test("test unzip:", () => {
+  expect(result).toBe(1);
+});
 
-// // });
+test("partition: consumes the sequence creating two arrays. one with values that satisfy the predicate and one with values that do not", () => {
+  let part = partition((x: number) => x % 2 === 0)(bigArr.values());
+
+  expect(part[0]).toEqual([2, 4, 6]);
+  expect(part[1]).toEqual([1, 3, 5]);
+});
+
+// TODO expand this test
+test("position: returns the position of the value that matches the predicate or null if there is not a match", () => {
+  let index = position((x: number) => x === 2)(arr.values());
+
+  expect(index).toBe(1);
+});
+
+
+test("test product: returns the product of all values in the sequence, consuming the sequence", () => {
+  let result = product(arr.values());
+
+  expect(result).toBe(6);
+});
+
+test("reduce: applys a reducer function to each element and an accumulated value, producing a single result", () => {
+  let sum = reduce((acc: number, x: number) => acc + x, 0)(bigArr.values());
+
+  expect(sum).toBe(21);
+});
+
+test("sum: returns the sum of all values in the sequence, consuming the sequence", () => {
+  let result = sum(arr.values());
+
+  expect(result).toBe(6);
+});
+
 
 // test("test minByKey: returns the element that gives the min value from the function", () => {
 //   let min = sequence(bigArr).minByKey(x => x * -x);
@@ -212,17 +231,6 @@ test("forEach: forEach consumes the iterator, mimicing a for-loop's behavior", (
 //   expect(max).toBe(1);
 // });
 
-// test("test sum: returns the sum of all values in the sequence, consuming the sequence", () => {
-//   let sum = sequence(arr).sum();
-
-//   expect(sum).toBe(6);
-// });
-
-// test("test product: returns the product of all values in the sequence, consuming the sequence", () => {
-//   let product = sequence(arr).product();
-
-//   expect(product).toBe(6);
-// });
 
 // // test("test cycle: repeats the sequence endlessly", () => {
 // //   let seq = sequence(arr);
@@ -233,19 +241,6 @@ test("forEach: forEach consumes the iterator, mimicing a for-loop's behavior", (
 // //   expect(seq.next().value).toBe(3);
 // // });
 
-// test("test all: tests if all values of the sequence matches the given predicate. Short circuits on false value", () => {
-//   let seq1 = sequence(arr);
-//   let result1 = seq1.all(x => x < 10);
-
-//   expect(result1).toBe(true);
-//   expect(seq1.next().value).toBe(undefined);
-
-//   let seq2 = sequence(arr);
-//   let result2 = seq2.all(x => x < 2);
-
-//   expect(result2).toBe(false);
-//   expect(seq2.next().value).toBe(3);
-// });
 
 // test("test find: finds a value that satisfies the given predicate and returns it. Does not consume the rest of the sequence", () => {
 //   let seq = sequence(arr)
@@ -254,52 +249,4 @@ test("forEach: forEach consumes the iterator, mimicing a for-loop's behavior", (
 //   expect(val).toBe(2);
 //   expect(seq.next().value).toBe(3);
 //   expect(seq.next().value).toBe(undefined);
-// });
-
-// test("test position:", () => {
-//   let index = sequence(arr).position(x => x === 2);
-
-//   expect(index).toBe(1);
-// });
-
-// test("test chain:", () => {
-//   let arr1 = [0, 2];
-//   let arr2 = [4];
-//   let seq = sequence(arr1).chain(sequence(arr2));
-
-//   expect(seq.next().value).toBe(0);
-//   expect(seq.next().value).toBe(2);
-//   expect(seq.next().value).toBe(4);
-//   expect(seq.next().value).toBe(undefined);
-// });
-
-// test("test prototype: check prototype chain of each method", () => {
-//   let seq =
-//     sequence(bigArr)
-//       .map(x => x)
-//       .filter(x => x !== 100)
-//       .takeWhile(x => x < 100)
-//       .skipWhile(x => x < 0)
-//       .skip(0)
-//       .take(6)
-//       .map(x => [[x]])
-//       .flatten()
-//       .flatMap(x => x.concat(x))
-//       // .peekable()
-//       .collect();
-
-//   expect(seq).toEqual([1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6]);
-
-//   let zipped = sequence(bigArr).zip(sequence(arr)).filter(x => x[0] === 3 && x[1] === 3);
-//   expect(zipped.next().value).toEqual({ 0: 3, 1: 3 });
-
-//   let enumerated = sequence(arr).enumerate().filter(x => x.i === 0);
-//   expect(enumerated.next().value).toEqual({ i: 0, value: 1 });
-  
-//   let nth = sequence(arr).nth(1).map(x => x + 1);
-//   expect(nth.next().value).toBe(3);
-
-//   let sec = [4, 5, 6];
-//   let chain = sequence(arr).chain(sequence(sec)).nth(5);
-//   expect(chain.next().value).toBe(6);
 // });
