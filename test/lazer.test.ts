@@ -1,5 +1,5 @@
 import { Seq, any, chain, enumerate, filter, flatMap, flatten, forEach, map, nth, skip, skipWhile, take, takeWhile, zip,
-         all, count, max, maxByKey, min, minByKey, partition, position, product, reduce, sum } from "../src/lazer";
+         collect, all, count, find, max, maxByKey, min, minByKey, partition, position, product, reduce, sum, toArray } from "../src/lazer";
 
 
 let arr = [1, 2, 3];
@@ -151,6 +151,12 @@ test("zip: takes two iterators and returns a new iterator that iterates over bot
 
 //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx Collector tests XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+test("toArray: consumes the sequence, returning an array of its values", () => {
+  let result = toArray(arr.map(x => x + 1).values());
+
+  expect(result).toEqual([2, 3, 4]);
+});
+
 test("all: tests if all values of the sequence match the given predicate. Short circuits on false value", () => {
   let seq1 = arr.values();
   let result1 = all(x => x < 10)(seq1);
@@ -171,6 +177,21 @@ test("count: counts the number of values in the sequence, consuming it in the pr
 
   expect(result).toBe(6);
   expect(seq.next().value).toBe(undefined);
+});
+
+
+test("find: finds a value that satisfies the given predicate and returns it. Does not consume the rest of the sequence", () => {
+  let seq = arr.values();
+  let val = find((x: number) => x === 2)(seq);
+
+  expect(val).toBe(2);
+  expect(seq.next().value).toBe(3);
+  expect(seq.next().value).toBe(undefined);
+
+  let seq2 = arr.values();
+  let val2 = find((x: number) => x === 5)(seq2);
+  expect(val2).toBe(undefined);
+  expect(seq2.next().value).toBe(undefined);
 });
 
 test("max: returns the maximum value of the sequence, consuming the sequence", () => {
@@ -242,25 +263,28 @@ test("sum: returns the sum of all values in the sequence, consuming the sequence
 });
 
 
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+test("collect: applies a collector function to the sequence, consuming it and producing a final value", () => {
+  const plus5er = (iter: IterableIterator<number>) => {
+    let arr = [];
+    for (let val of iter) {
+      arr.push(val + 5);
+    }
+    return arr;
+  }
 
+  let result = collect(arr.values(), plus5er);
 
+  expect(result).toEqual([6, 7, 8]);
+});
 
+test("pipe: pipes a sequence through a series of generator functions", () => {
+  let seq = Seq.from(bigArr).pipe(
+    map(x => x + 10),
+    filter(x => x % 2 === 0)
+  );
 
-// // test("test cycle: repeats the sequence endlessly", () => {
-// //   let seq = sequence(arr);
-
-// //   for (let i = 0; i < 8; i++) {
-// //     seq.next();
-// //   }
-// //   expect(seq.next().value).toBe(3);
-// // });
-
-
-// test("test find: finds a value that satisfies the given predicate and returns it. Does not consume the rest of the sequence", () => {
-//   let seq = sequence(arr)
-//   let val = seq.find(x => x === 2);
-
-//   expect(val).toBe(2);
-//   expect(seq.next().value).toBe(3);
-//   expect(seq.next().value).toBe(undefined);
-// });
+  let result = collect(seq, toArray);
+  
+  expect(result).toEqual([12, 14, 16]);
+});

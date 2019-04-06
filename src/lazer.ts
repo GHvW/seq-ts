@@ -216,6 +216,17 @@ export const count = <T>(iter: IterableIterator<T>) => {
   return count;
 }
 
+
+export const find = <T>(predicate: (x: T) => boolean) => {
+  return (iter: IterableIterator<T>) => {
+    let next = iter.next();
+    while (!next.done && !predicate(next.value)) {
+      next = iter.next();
+    }
+    return next.value;
+  }
+}
+
 export const max = <T>(iter: IterableIterator<T>) => {
   let max = iter.next().value;
   for (let val of iter) {
@@ -327,41 +338,4 @@ export const sum = (iter: IterableIterator<number>) => {
   return result;
 }
 
-// // this is wrong, check it
-// // sequence.prototype.minByKey = function<T, U>(fn: (x: T) => U) {
-// //   let currMin = this.next().value;
-// //   for (let val of this) {
-// //     if (fn(currMin) > fn(val)) {
-// //       currMin = val;
-// //     }
-// //   }
-// //   return currMin;
-// // }
 
-// // sequence.prototype.maxByKey = function(fn) {
-// //   let currMax = this.next().value;
-// //   for (let val of this) {
-// //     if (fn(currMax) < fn(val)) {
-// //       currMax = val;
-// //     }
-// //   }
-// //   return currMax;
-// // }
-
-
-// //rework to work with other types?
-// sequence.prototype.product = function() {
-//   let acc = 1;
-//   for(let val of this) {
-//     acc *= val;
-//   }
-//   return acc;
-// }
-
-// sequence.prototype.find = function<T>(predicate: (x: T) => boolean): T {
-//   let next = this.next();
-//   if (!next.done && !predicate(next.value)) {
-//     next = this.next();
-//   }
-//   return next.value;
-// }
