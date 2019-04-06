@@ -227,6 +227,19 @@ export const max = <T>(iter: IterableIterator<T>) => {
   return max;
 }
 
+export const maxByKey = <T, U>(fn: (x: T) => U) => {
+  return (iter: IterableIterator<T>) => {
+    let max = iter.next().value;
+    for (let val of iter) {
+      if (fn(val) >= fn(max)) {
+        max = val
+      }
+    }
+
+    return max;
+  }
+}
+
 export const min = <T>(iter: IterableIterator<T>) => {
   let min = iter.next().value;
   for (let val of iter) {
@@ -236,6 +249,19 @@ export const min = <T>(iter: IterableIterator<T>) => {
   }
 
   return min;
+}
+
+export const minByKey = <T, U>(fn: (x: T) => U) => {
+  return (iter: IterableIterator<T>) => {
+    let min = iter.next().value;
+    for (let val of iter) {
+      if (fn(val) <= fn(min)) {
+        min = val
+      }
+    }
+
+    return min;
+  }
 }
 
 interface PartitionResult<T> {

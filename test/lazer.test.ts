@@ -1,5 +1,5 @@
 import { Seq, any, chain, enumerate, filter, flatMap, flatten, forEach, map, nth, skip, skipWhile, take, takeWhile, zip,
-         all, count, max, min, partition, position, product, reduce, sum } from "../src/lazer";
+         all, count, max, maxByKey, min, minByKey, partition, position, product, reduce, sum } from "../src/lazer";
 
 
 let arr = [1, 2, 3];
@@ -179,10 +179,33 @@ test("max: returns the maximum value of the sequence, consuming the sequence", (
   expect(result).toBe(3);
 });
 
+test("maxByKey: returns the element that gives the max value from the function", () => {
+  let max = maxByKey((x: number) => x - 2 * x)(bigArr.values());
+
+  expect(max).toBe(1);
+
+  let empty: number[] = [];
+  let emptyMax = maxByKey((x: number) => x * 2)(empty.values());
+
+  expect(emptyMax).toBe(undefined);
+});
+
 test("min: returns the minimum value of the sequence, consuming the sequence", () => {
   let result = min(arr.values());
 
   expect(result).toBe(1);
+});
+
+
+test("minByKey: returns the element that gives the min value from the function", () => {
+  let min = minByKey((x: number) => x * -x)(bigArr.values());
+
+  expect(min).toBe(6)
+
+  let empty: number[] = [];
+  let emptyMin = minByKey((x: number) => x * 2)(empty.values());
+
+  expect(emptyMin).toBe(undefined);
 });
 
 test("partition: consumes the sequence creating two arrays. one with values that satisfy the predicate and one with values that do not", () => {
@@ -200,7 +223,7 @@ test("position: returns the position of the value that matches the predicate or 
 });
 
 
-test("test product: returns the product of all values in the sequence, consuming the sequence", () => {
+test("product: returns the product of all values in the sequence, consuming the sequence", () => {
   let result = product(arr.values());
 
   expect(result).toBe(6);
@@ -219,17 +242,8 @@ test("sum: returns the sum of all values in the sequence, consuming the sequence
 });
 
 
-// test("test minByKey: returns the element that gives the min value from the function", () => {
-//   let min = sequence(bigArr).minByKey(x => x * -x);
 
-//   expect(min).toBe(6)
-// });
 
-// test("test maxByKey: returns the element that gives the max value from the function", () => {
-//   let max = sequence(bigArr).maxByKey(x => x - 2 * x);
-
-//   expect(max).toBe(1);
-// });
 
 
 // // test("test cycle: repeats the sequence endlessly", () => {
