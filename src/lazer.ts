@@ -6,18 +6,18 @@ export class Sequence<T> {
       this.seq = seq;
   }
 
-  *pipe(...generators: Array<(x: IterableIterator<any>) => IterableIterator<any>>): IterableIterator<any> {
-      let result = this.seq;
-      for (let gen of generators) {
-          result = gen(result);
-      }
-
-      yield* result;
+  *iter(): Generator<T, void, undefined> {
+    yield* this.seq;
   }
 
-  // This probably shouldn't be needed
-  *iter() {
-    yield* this.seq;
+  andThen<U>(fn: (x: IterableIterator<T>) => IterableIterator<U>): Sequence<U> {
+    return new Sequence(fn(this.seq));
+  }
+
+  collect<U>(collector?: (x: IterableIterator<T>) => U): U | T[] {
+    return collector 
+      ? collector(this.seq)
+      : toArray(this.seq);
   }
 }
 
@@ -329,7 +329,7 @@ export const reduce = <T, U>(reducer: (acc: U, x: T) => U, initial: U) => {
   };
 }
 
-export const sum = (iter: IterableIterator<number>) => {
+export function sum(iter: IterableIterator<number>): number {
   let result = iter.next().value;
   for (let val of iter) {
     result += val;
