@@ -113,7 +113,7 @@ test("skip: skip n elements of the sequence, consuming them", () => {
 
 
 test("skipWhile: skip until predicate satisfied, consuming skipped values", () => {
-  let seq = skipWhile(x => x < 5)(bigArr.values());
+  let seq = skipWhile((x: number) => x < 5)(bigArr.values());
 
   expect(seq.next().value).toBe(5);
   expect(seq.next().value).toBe(6);
@@ -131,7 +131,7 @@ test("take: yields the first n elements of the iterator", () => {
 });
 
 test("takeWhile: take until predicate is false", () => {
-    let seq = takeWhile(x => x < 2)(arr.values());
+    let seq = takeWhile((x: number) => x < 2)(arr.values());
 
     expect(seq.next().value).toBe(1);
     expect(seq.next().value).toBe(undefined);
@@ -159,13 +159,13 @@ test("toArray: consumes the sequence, returning an array of its values", () => {
 
 test("all: tests if all values of the sequence match the given predicate. Short circuits on false value", () => {
   let seq1 = arr.values();
-  let result1 = all(x => x < 10)(seq1);
+  let result1 = all((x: number) => x < 10)(seq1);
 
   expect(result1).toBe(true);
   expect(seq1.next().value).toBe(undefined);
 
   let seq2 = arr.values();
-  let result2 = all(x => x < 2)(seq2);
+  let result2 = all((x: number) => x < 2)(seq2);
 
   expect(result2).toBe(false);
   expect(seq2.next().value).toBe(3);
@@ -278,13 +278,54 @@ test("collect: applies a collector function to the sequence, consuming it and pr
   expect(result).toEqual([6, 7, 8]);
 });
 
-test("pipe: pipes a sequence through a series of generator functions", () => {
-  let seq = Seq.from(bigArr).pipe(
-    map(x => x + 10),
-    filter(x => x % 2 === 0)
-  );
+test("andThen: pipes a sequence through a series of generator functions", () => {
+  let seq = Seq.from(bigArr)
+    .andThen(map(x => x + 10))
+    .andThen(filter(x => x % 2 === 0));
 
-  let result = collect(seq, toArray);
+  let result = collect(seq.iter(), toArray);
   
   expect(result).toEqual([12, 14, 16]);
+});
+
+test("andThen iter: make sure sequences evaluate correctly", () => {
+  const seq = Seq.from(bigArr)
+    .andThen(filter(x => x % 2 === 0))
+    .andThen(map(x => x + 10))
+    .iter();
+
+  const first = seq.next().value; 
+  const second = seq.next().value;
+  const third = seq.next().value;
+  
+  expect(first).toEqual(12);
+  expect(second).toEqual(14);
+  expect(third).toEqual(16);
+});
+
+test("Sequence collect: same as collect, but lets you 'dot' off of a Sequence. Defaults to 'toArray'", () => {
+
+  const result1 = Seq.from(bigArr)
+    .andThen(filter(x => x % 2 === 0))
+    .andThen(map(x => x + 10))
+    .collect();
+
+  const result2 = Seq.from(bigArr)
+    .andThen(filter(x => x % 2 === 0))
+    .andThen(map(x => x + 10))
+    .collect(sum);
+
+  expect(result1).toEqual([12, 14, 16]);
+  expect(result2).toEqual(42);
+});
+
+test("Map: tests functionality with Map.prototype.entries()", () => {
+  const hashmap = new Map([["Texas", "Austin"], ["Massachusetts", "Boston"], ["Washington", "Olympia"], ["Iowa", "Des Moines"]]);
+  const result = 
+    Seq.from(hashmap.entries())
+      .andThen(filter(([state, _]) => state.length < 6))
+      .andThen(map(([_, city]) => city))
+      .collect();
+
+    expect(result).toEqual(["Austin", "Des Moines"]);
 });
