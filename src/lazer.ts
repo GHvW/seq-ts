@@ -180,7 +180,7 @@ export const zip = <T>(firstIter: IterableIterator<T>) => {
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Collectors XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 
-export const collect = <T, U>(iter: IterableIterator<T>, collector: (x: IterableIterator<T>) => U) => {
+export const collect = <T, U>(collector: (x: IterableIterator<T>) => U) => (iter: IterableIterator<T>) => {
   return collector(iter);
 }
 

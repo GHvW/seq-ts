@@ -273,7 +273,7 @@ test("collect: applies a collector function to the sequence, consuming it and pr
     return arr;
   }
 
-  let result = collect(arr.values(), plus5er);
+  let result = collect(plus5er)(arr.values());
 
   expect(result).toEqual([6, 7, 8]);
 });
@@ -283,7 +283,7 @@ test("andThen: pipes a sequence through a series of generator functions", () => 
     .andThen(map(x => x + 10))
     .andThen(filter(x => x % 2 === 0));
 
-  let result = collect(seq.iter(), toArray);
+  let result = collect(toArray)(seq.iter());
   
   expect(result).toEqual([12, 14, 16]);
 });
@@ -331,7 +331,7 @@ test("Map: tests functionality with Map.prototype.entries()", () => {
 });
 
 test("first docs example", () => {
-  const arr = collect(map((n: number) => n * 10)(filter((n: number) => n % 2 === 0)([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].values())), toArray);
+  const arr = collect(toArray)(map((n: number) => n * 10)(filter((n: number) => n % 2 === 0)([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].values())));
 
   expect(arr).toEqual([20, 40, 60, 80, 100]);
 });

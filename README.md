@@ -23,7 +23,7 @@ const arr =
 
 To create the same ending final `Array` with lazer, you would write:
 ```javascript
-const arr = collect(map(n => n * 10)(filter(n => n % 2 === 0)([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].values())), toArray);
+const arr = collect(toArray)(map(n => n * 10)(filter(n => n % 2 === 0)([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].values())));
 ```
 
 Gross, I know. If you're eyes are bleeding after looking at the exapmle, lazer provides a small `Sequence` class and `Seq` static class to facilitate a more fluent interface. Using `Seq` and `Sequence`, the lazer example can be written like this:
@@ -43,6 +43,15 @@ const res =
         .andThen(filter(n => n % 2 === 0))
         .andThen(map(n => n * 10))
         .collect(sum); // 300
+```
+
+Lazer's explicitely curried functions make it so that if a pipe operator makes it into JavaScript, the same sequence could be written something like this (depending on which pipe operator makes it into the spec):
+```javascript
+    const arr =
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        |> filter(n => n % 2 === 0)
+        |> map(n => n * 10)
+        |> collect(toArray)
 ```
 
 Lazer is not going to be the right approach for everyone, and might not seem very Typescript-y or even JavaScript-y.
