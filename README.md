@@ -47,6 +47,6 @@ const res =
 
 Lazer is not going to be the right approach for everyone, and might not seem very Typescript-y or even JavaScript-y.
 
-If you want a different library with similar aims, try out [Sequency](https://github.com/winterbe/streamjs) or [Streamjs](https://github.com/winterbe/streamjs). While I haven't used them personally, [Immutable js](https://immutable-js.github.io/immutable-js/), [Lodash](https://github.com/lodash/lodash) and [RxJS](https://github.com/ReactiveX/rxjs) may satisfy your needs as well.
+If you want a different library with similar aims, try out [Sequency](https://github.com/winterbe/streamjs) or [Streamjs](https://github.com/winterbe/streamjs). [Immutable js](https://immutable-js.github.io/immutable-js/), [Lodash](https://github.com/lodash/lodash), and [RxJS](https://github.com/ReactiveX/rxjs) may satisfy your needs as well.
 
 As an alternative, if you don't want to deal with finding suite of JavaScript packages but still want a fully featured solution to many JavaScript pain points, try [ClojureScript](https://clojurescript.org/)
