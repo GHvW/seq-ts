@@ -7,7 +7,7 @@ Lazer aims to achieve its goal with three guiding principles
 2. No prototype extension - to avoid conflicts or changes to JavaScript in the future, no adding methods to `Array.prototype`, `Map.prototype`, or any other native JavaScript data structures.
 3. Minimal to no data structure lock-in - many JavaScript libraries that provide extensions for native types force you to use a special syntax or data structure to enable the extensions. While there is absolutely nothing wrong with that (and is often preferred), it locks you into that library's style. Once you're locked in, it can be hard to migrate to future enhancements to core JavaScript.
 
-Lazer's uses [generators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator) on stand-alone functions to enable this functionality.
+Lazer uses [generators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator) on stand-alone functions to enable this functionality.
 
 Traditional `Array.prototype` methods like map, filter, reduce, etc. are provided as stand-alone functions instead of methods on a stream or sequence data structure. If a function takes multiple arguments, it is explicitely curried to provide maximum flexibility.
 
