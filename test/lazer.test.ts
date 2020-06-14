@@ -329,3 +329,30 @@ test("Map: tests functionality with Map.prototype.entries()", () => {
 
     expect(result).toEqual(["Austin", "Des Moines"]);
 });
+
+test("first docs example", () => {
+  const arr = collect(map((n: number) => n * 10)(filter((n: number) => n % 2 === 0)([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].values())), toArray);
+
+  expect(arr).toEqual([20, 40, 60, 80, 100]);
+});
+
+test("second docs example", () => {
+
+  const arr =
+    Seq.of(1, 2, 3, 4, 5, 6, 8, 9, 10) // could also be written `Seq.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].values())
+        .andThen(filter(n => n % 2 === 0))
+        .andThen(map(n => n * 10))
+        .collect();
+
+  expect(arr).toEqual([20, 40, 60, 80, 100]);
+});
+
+test("third docs example", () => {
+  const result =
+    Seq.of(1, 2, 3, 4, 5, 6, 8, 9, 10) // could also be written `Seq.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].values())
+        .andThen(filter(n => n % 2 === 0))
+        .andThen(map(n => n * 10))
+        .collect(sum);
+
+  expect(result).toEqual(300);
+});
